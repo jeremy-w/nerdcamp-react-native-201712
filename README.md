@@ -491,26 +491,266 @@ And that links to a [list of open-source RN apps](https://github.com/ReactNative
 ## 2017-12-13 (Wed)
 Today:
 
-- Finish reading the Guides & Guides (iOS) sections. This has been valuable, and is worth continuing.
-- Review the RN Changelog to get a feel for how it's developed. (timebox to 30 min)
-- Build and run an app on iOS, and root around at runtime.
-- Dig into WalmartLabs' Electrode Native, which looks like a ready-made tool for jumping into (though not sure about back out of) RN in the context of a mostly-native app.
+- Got sucked into work-work all morning. :(
+- Finished reading the Guides docs section.
+- Almost finished reading the iOS Guides section.
+- Sorted out what "Yoga" is. (Flexbox. Ish. As a C library.)
+- Reviewed the RN Changelog to get a feel for how often they break stuff that'd be hard to update.
+    - Not too often, it seems to me. :+1::skin-tone-4:
 
 Next:
 
-- XXX
+- Finish mining the iOS Guides.
+- Look into how to bounce back OUT of React Native to Native-Native. Getting in is easy. Getting out? I'm not at all clear on that!
+    - Look into WalmartLabs' Electrode Native, which looks like a ready-made tool for jumping into (though not sure about back out of) RN in the context of a mostly-native app.
+- Build and run an app on iOS, and root around at runtime.
 
 
 ### Guides, Continued
 - Running on Device:
+    - CRAN: Scan the QR code with the Expo app.
+    - Otherwise:
+        - Eject
+        - Install deps per Getting Started
+        - iOS
+            - Build & Run
+                - Shake to pull up Developer menu, which includes Live Reload.
+                - XXX: Live reload connection actually bakes the local IP of the
+                  build machine into the binary as `10.0.1.123.xip.io`. Why not
+                  Bonjour at least? :(
+                    - Live Reload: Reloads code & app automatically.
+                    - Hot Reload: Just reloads code, not app state.
+                - XXX: "ATS is disabled for localhost by default in React Native
+                  projects in order to make development easier."
+            - Releasing: Set up the Release scheme, ensure ATS is enabled, Build & Archive.
+                - Or use `react-native run-ios --configuration Release`.
+        - Android
+            - Enable USB debugging for your phone
+            - Verify adb can see it with `adb devices`
+                - XXX: Only 1 device should show as "device" rather than "offline".
+            - `react-native run-android`
+            - Live reload
+                - USB (recommended): `adb reverse tcp:8081 tcp:8081`
+                    - Requires Lollipop or later with USB debugging enabled.
+                - Network: Dev menu, Dev settings, Debug server host, enter IP & port, Reload JS
+            - Releasing
+                - Follow the "generating a signed APK" docs from the Android guides.
+
 - Upgrading:
+    - Depends on whether you used CRAN or `react-native init`.
+    - CRAN:
+        - Bump `react-native`, `react`, and `expo` in `package.json`.
+        - Bump `sdkVersion` in `app.json`.
+        - The bumps all have to be coordinated.
+        - See [CRNA user guide](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/README.md#updating-to-new-releases).
+    - Otherwise:
+        - They basically figure that you'd only bother with `react-native init`
+          if you're using native code.
+        - "Because React Native projects built with native code are essentially
+          made up of an Android project, an iOS project, and a JavaScript
+          project, upgrading can be rather tricky."
+            - XXX: This looks less tricky than they make it sounds to me, but
+              I'm also uncomfortably comfortable with resolving horrible merges
+              by hand.
+        - It's roughly:
+            - `npm install --save` the new versions of react-native and possibly react.
+            - Apply needed updates to the iOS & Android template files.
+                - Annoying: `react-native upgrade` has you pick yours or theirs.
+                - Smarter: `react-native-git-upgrade` uses git to do a 3-way merge to try to pull in changes to the templates.
+                - Help: [ncuillery/rn-diff](https://github.com/ncuillery/rn-diff) is _just_ the templates at each version, so you can see what's been changing, and if needed, manually apply the changes. (They're often very small!)
+            - Do any manual upgrade steps listed in the Release Notes.
+                - Example: [0.29.0](https://github.com/facebook/react-native/releases/tag/v0.29.0)
+                    - Cued by "Migration instructions for apps"
+                    - There doesn't look to have been a lot of these, though
+                      "Breaking Changes" should probably be treated as similar
+                      "manual steps", and those do happen.
+
 - Troubleshooting:
+    - Server port conflicts, resolved with `react-native start --port=SOME_UNUSED_NUMBER`
+    - NPM locking issue, snag ownership of ~/.npm and /u/l/l/node_modules
+    - Double-check all needed native libs are linked in
+    - Import React (and its WebSocket polyfills) before anything else that wants WebSockets, like Firebase
+    - Reinstall watchman if react-native init hangs (https://github.com/facebook/react-native/issues/9943#issuecomment-247899222)
+    - Increase max watches for inotify on Linux if you start seeeing ENOSPC from watchman
+
+
+### Yoga: Facebook's "flexbox-ish" layout engine
+This kept coming up. And I saw Microsoft had patched it IIRC to fix a bug for
+Windows.
+
+Looks like it's Facebook condensing their "flexbox-ish" layout engine as
+a standalone project: https://facebook.github.io/yoga/
+
+So that's where you'd want to look for details on how React Native layout works
+under the hood.
 
 
 ### iOS Guides
-XXX
+- Native Modules
+    - "If React Native doesn't support a native feature that you need, you
+      should be able to build it yourself."
+    - "A native module is just an Objective-C class that implements the
+      RCTBridgeModule protocol."
+    - Constants:
+        - Return a dictionary from `-constantsToExport`
+        - Imported at init, and never pulled again, so don't mutate these.
+    - Inline `RCP_EXPORT_MODULE()` and tag methods with `RCT_EXPORT_METHOD` or `RCT_REMAP_METHOD`
+        - Methods show up as `ModuleName.firstChunkOfSelector()` in JS.
+        - Methods are always `oneway void`. Use callbacks, promises, or events.
+    - JSON args can be passed through, plus:
+        - Functions as `RCTResponseSenderBlock`.
+        - Any type returned by a method in `RCTConvert`, like `NSDate`, which is returned by `+ (NSDate *)NSDate:(id)json`
+        - For collections, you have to use `RCTConvert` yourself to check the contents.
+        - To add conversion support for an `NS_ENUM`, use `RCT_ENUM_CONVERTER` in a category on `RCTConvert`.
+            - XXX: Guide erroneously calls this a "class extension".
+    - Callbacks:
+        - `RCTResponseSenderBlock`
+        - One-shot, but can be stored before calling.
+        - Node errbacks: Call with array where `array.first` is an error, and
+          the rest are results.
+            - Use `NSNull.null` for `noerr`.
+            - Use `RCTMakeError` for actual errors.
+    - Promises:
+        - Plays nice with async/await.
+        - Last two args have type `RCTPromiseResolveBlock` and `RCTPromiseRejectBlock`.
+        - JS API then returns a promise.
+        - Call one of those to resolve it.
+    - Events:
+        - To send, subclass `RCTEventEmitter`, which gives you `-supportedEvents` and `-sendEventWithName:body:`.
+        - To subscribe to events in JS, create a `NativeEventEmitter` for your module and subscribe with `addListener` for the event name.
+            - Call `subscription.remove()` when done, probably in `compenentWillUnmount`.
+        - Use `startObserving`/`stopObserving` to track whether you even have
+          listeners. If none, skip sending your event, or get scolded by React
+          Native.
+        - For Swift, bridge it to Obj-C using an `RCT_EXTERN{,_REMAP}_MODULE`
+          declaration for the module class and `RCT_EXTERN{,_REMAP}_METHOD` for the
+          relevant methods. And yes, you must `@objc` ALL the things.
+    - Threading:
+        - "React Native invokes native modules methods on a separate serial GCD
+          queue, but this is an implementation detail and might change."
+        - Implement `-methodQueue` to specify a queue to call your methods on.
+            - "The methodQueue method will be called once when the module is
+              initialized, and then retained by the bridge, so there is no need
+              to retain the queue yourself, unless you wish to make use of it
+              within your module."
+        - Or just use `dispatch_async` as needed.
+     - Creation:
+        - The bridge will stand up your RCTBridgeModules by default.
+        - If you need to provide initializers, hand it an `RCTBridgeDelegate`,
+          and then you can do that yourself.
+     - GOTCHA: Fun times if you're using a native module that uses Swift:
+        - "In order for the Xcode project to build when you use Swift in the
+          iOS static library you include in the module, your main app project
+          must contain Swift code and a bridging header itself."
+        - Empty versions of both are A-OK.
+
+- Native UI Components
+    - In Native:
+        - RCTUIManager pokes at instances of RCTViewManager to read and write view props.
+        - Each RCTBridge owns one instance of each of the registered RCTViewManagers.
+        - An RCTViewManager is exported using `RCT_EXPORT_MODULE()` as with native modules.
+        - To create views:
+            - Each RCTViewManager has a `-view` factory method.
+        - To control views:
+            - Add `RCT_EXPORT_VIEW_PROPERTY(name, type)` for simple properties.
+                - The type gets run through RCTConvert.
+            - For more complicated ones, use `RCT_CUSTOM_VIEW_PROPERTY(name, propType, ofClass)`.
+                - This is the setter. You'll talk to `view` in the body. The
+                  argument is named `json`. Yay name injection through macros.
+                - You'll likely want to use `RCTConvert`. Don't forget to handle `nil`.
+        - To emit values:
+            - `RCT_EXPORT_VIEW_PROPERTY(onRegionChange, RCTBubblingEventBlock)`
+            - Call that method to send the value.
+    - In JS:
+        - Create a corresponding JS file.
+        - Export your native component: `module.exports = requireNativeComponent('NativeModuleNameMinusManagerSuffix', nullOrWrapperComponentRef)`.
+            - XXX: Guide doesn't say what `null` is there. Till later, that is. It's actually the variable/const/class, not a string.
+            - **Auto-suffixing:** `MyComponent` automatically resolves to the class `MyComponentManager`.
+        - With properties, you'll want to export a wrapper component, instead,
+          and keep the native component internal.
+        - And for events, you'll want to massage them a bit by playing with
+          `event.nativeEvent` before calling the public event handler declared
+          on your wrapper component.
+        - Then declare and document your properties in the
+          `MyComponent.propTypes` object.
+            - Maps `name` to `PropTypes.someType`.
+            - Or to something more complicated, like `PropTypes.shape`.
+                - "Here you can see that the shape of the MKRegion arg is
+                  explicit in the JS documentation - ideally we could codegen
+                  some of this stuff, but that's not happening yet."
+     - Advanced:
+        - It turns out there's a third arg to requireNativeComponent, options.
+        - "Since you don't want these native only properties to be part of the
+          API, you don't want to put them in propTypes, but if you don't you'll
+          get an error. The solution is simply to add them to the nativeOnly
+          option"
+        - You can use a wrapper component to deal with fixed sizes and styles
+          forced on you by native.
+        - And, in the end, "look, just look at the source code at this point,
+          OK?"
+
+          > This guide covered many of the aspects of bridging over custom
+          > native components, but there is even more you might need to
+          > consider, such as custom hooks for inserting and laying out
+          > subviews. If you want to go even deeper, check out the source code
+          > of some of the implemented components.
+
+- Linking Libraries
+    - Skipped
+
+- Running on Sim
+    - Skipped
+
+- Apple TV
+    - Skipped
+
+- Communication
+    - Properties, Events: Already covered!
+        - "The common pattern we use when embedding native in React Native is
+          to make the native component's RCTViewManager a delegate for the
+          views, sending events back to JavaScript via the bridge. This keeps
+          related event calls in one place."
+        - GOTCHA: Watch out for name collisions. No static checker is
+          implemented.
+        - TRICKY: "If you use several instances of the same React Native
+          component and you want to distinguish them from the perspective of
+          your event, you'll likely need to introduce identifiers and pass them
+          along with events (you can use the native view's reactTag as an
+          identifier)."
+    - Layout: Let's read this tomorrow:
+      [start here](https://facebook.github.io/react-native/docs/communication-ios.html#layout-computation-flow)
+
+- App Extensions
+    - This seems useful for understanding the context.
 
 
+
+## 2017-12-14 (Thurs)
+Today:
+
+- Read through the rest of the iOS Guides (that I cared to).
+- Dove into how to bounce out of React back to Native.
+
+Next:
+
+- Let's do some public-facing writing!
+
+
+### iOS Guides, Continued
+- Communication
+    - Layout
+        - XXX
+
+- App Extensions
+
+
+### How to bounce back from React Native to Native-Native?
+They make it easy to get _in._
+
+How do you get _out?_
+
+
+## SOMEDAY/MAYBE
 ### React Native: The How, Statically
 Let's look at how apps get built.
 
