@@ -728,26 +728,177 @@ under the hood.
 ## 2017-12-14 (Thurs)
 Today:
 
-- Read through the rest of the iOS Guides (that I cared to).
-- Dove into how to bounce out of React back to Native.
+- Summarized Electrode Native.
+- Read through the rest of the iOS Guides.
+- Wrote a high-level description of Expo.
+- Summarized how you might weave between RN & NN.
 
 Next:
 
 - Let's do some public-facing writing!
 
 
+### Electrode Native
+Read through some of this last night.
+
+The core of it is a means to create, bundle, and then access "MiniApps" written using React Native.
+
+The MiniApps all get bundled up in a single framework / AAR for easy consumption from a native app.
+
+They can take advantage of an Electrode API system that makes it easy to generate the boilerplate bits of creating a strongly typed API between the MiniApps and the native or JS code that implements the API. This uses a Swagger API definition as input and spits out relevant stub declarations. This makes it easy to standardize how the MiniApps communicate with the rest of the system.
+
+You'll likely wind up writing your own navigation API. This is about the point where I connected this to the Coordinator Pattern as advanced by Soroush Khanlou. If your MiniApp is just a view anyway (which, yeah, that's how React Native thinks of the world), then it makes sense to just have it delegate away ALL the things.
+
+Alongside this bundler and RPC helper are a couple flavors of metadata: a "cauldron" and a "manifest". These are used to track what you've released using what versions of everything (MiniApp, API, native components); to ensure you're not trying to link together incompatible MiniApps that want different versions of the same native component; and to ensure you're pushing valid updates.
+
+This seems to lean on CodePush (which MS has deprecated and rolled into a new service) for the actual OTA update bit.
+
+#### Follow-Up Questions for Electrode Native
+
+- Usage: Is there a way to avoid the repo-splosion it assumes in terms of metadata and miniapps and apis?
+    - I think MiniApps and APIs can be easily rolled in, but it really expects separate repos for the metadata, it seems.
+        - Having scads of repos is obnoxious if you're working on a single project rather than reusing components across a stable of projects.
+        - That latter scenario is of course Walmart's, so I'm not surprised this is optimized for this, rather than more focused work-for-hire scenarios.
+    - ANSWER: MOSTLY.
+      - For MiniApps: There's
+        [discussion](https://electrode.gitbooks.io/electrode-native/overview/ern-workflow.html)
+        of just using the full native app,
+        rather than the standalone runner, to test your MiniApp. This is more
+        manual than the "throw it on npm" approach.
+
+        > If you are creating MiniApps for a single target mobile application
+        > or a very limited set of mobile applications (for example, if you are
+        > not creating an open source MiniApp such as only to be used for
+        > your company or private mobile applications), your workflow might
+        > involve the following…
+      - The Cauldron is assumed to be a standalone document database.
+        And you really don't want to modify it directly, since all the
+        integrity checks are implemented in the ern tooling as part of
+        the "try to apply a modification" flow.
+            - See [Cauldron "Guidelines and limitations"](https://electrode.gitbooks.io/electrode-native/platform-parts/cauldron.html#guidelines-and-limitations):
+
+              >  If you update a cauldron manually, you bypass all
+              >  compatibility checks performed by Electrode Native and you
+              >  risk de-synchronizing the container version and the yarn
+              >  locks. Only exception to this rule is if you need to setup
+              >  some config objects in the Cauldron (container generator,
+              >  manifest), as Electrode Native doest have any CLI command yet
+              >  to write configuration to the Cauldron.
+
+- Scope: Does this really address the "safe update" problem?
+    - UberEATS put a lot of work into this.
+    - It was also fingered as a pain point by Weex.
+    - There's some stuff in there around the cauldron and OTA updates, but what I read wasn't terribly clear on how this plays out in practice.
+    - ANSWER:
+        - There's none of the "fallback" support UberEATS built.
+        - The point of the cauldron/manifest is to ensure you can't break stuff.
+        - See end of Stage 2 in [Electrode native workflow](https://electrode.gitbooks.io/electrode-native/overview/ern-workflow.html).
+            - When you mark a mobile app as released, its native deps are
+              frozen, but you can still bump MiniApp versions that don't
+              require native dep changes and trigger a CodePush to update them.
+
+- Personal: Do I think this provides enough tooling to address the "migrating from React Native to Native Native" aim?
+    - It definitely makes NN to RN easier, and in a way that is less disruptive to the native apps than RN normally expects.
+    - It also makes it easier to build everything as little decoupled components with clear APIs, which is very nice.
+
+
+- Personal: Does this give me enough tooling already to build a meaningful architecture for RN/NN app weaving?
+    - The ways this might greatly encourage the Coordinator Pattern and Time-Travel State are especially interesting and possibly highly advantageous.
+    - But that also makes it harder to say "just drop it in, easy peasy!" to people used to Storyboards and Know-It-All ViewControllers.
+
+
+### Summarizing Expo
+*Originally wrote this up in a Slack message to explain what Expo was to
+someone. It seemed worth saving.*
+
+Expo has a Web IDE for React apps, and an accompanying Playground environment called Snack.
+
+The Expo SDK is a standardized bundle of common native components you'd want to use. They ship it in a wrapper app for iOS & Android, which makes it possible to just launch the app, scan a QR code with your project details, and then it can pull the JS bundle from the Expo Website and run it in the app for you to use for dev.
+
+This lets you dodge both "how do I build for iOS/Android" and "how do I do native stuff" entirely for common cases, and this definitely seems to be the preferred route for the community. It's got lots of things that make it easy and convenient going for it.
+
+When you "eject" from CRNA to do your own custom native stuff, you lose a lot of convenience and gain a lot of complexity.
+
+
+### GOTCHA: Nested Stateless Functional Components Do Not Hot Reload
+Stateless components appear to break Hot Reload in RN, but there's a workaround
+using a Babel transform. (What problems can preprocessing _not_ solve?)
+
+- Still broke: https://github.com/facebook/react-native/issues/8465
+- Workaround: https://github.com/bvic23/babel-plugin-functional-hmr
+
+Why bother?
+
+https://medium.com/@joshblack/stateless-components-in-react-0-14-f9798f8b992d
+
+"the ability to define stateless components as functions allows us to write
+components that are React agnostic."
+
+Plus: Perf optimizations, 'cause no state.
+
+(Though the ability to send in `(props, context)`, coupled with the Babel
+transform only working on 0- and 1-argument arrow functions, means you can't
+get hot reloading using it if you're using context. Fun!)
+
+
 ### iOS Guides, Continued
 - Communication
-    - Layout
-        - XXX
+    - [Layout](https://facebook.github.io/react-native/docs/communication-ios.html#layout-computation-flow)
+        - NN & RN have separate layout systems.
+        - When sticking NN in RN, stuff mostly just works, since we're pushing style & size attributes down into the system.
+        - When sticking RN into NN:
+            - Static size: Set the frame directly. If you change it later, it'll re-layout.
+            - Dynamic size:
+                - Stick it in a ScrollView and call it done. Now it's static.
+                - Ask it to measure itself:
+                    - Set the `RCTView.sizeFlexibility`. This is like springs - none, width, height, both.
+                        - You can change this at any point, and it'll re-layout.
+                    - Set the `RCTView.delegate` and implement `-rootViewDidChangeIntrinsicSize:`; pass the `view.intrinsicContentSize` in as `view.frame.size`.
+                    - GOTCHA: It won't do any layout till it has a superview.
+                        - WORKAROUND: Hide it, add it, size it, then unhide it to avoid weirdness.
+                    - CAREFUL: Layout happens on a dedicated thread. This is
+                      separate from native UI updates that happen on the main
+                      thread. So native & RN can get out of sync. Fun! "This is
+                      a known problem and our team is working on synchronizing
+                      UI updates coming from different sources."
 
 - App Extensions
+    - Memory constraints make this unlikely to work. Constraints vary by type.
+    - Today: 16 MB limit is too small for RN. Don't bother, unless it's really
+      simple.
+    - Keyboard: 48 MB. Might work.
+    - Share: 120 MB. Probably doable.
 
 
 ### How to bounce back from React Native to Native-Native?
 They make it easy to get _in._
 
 How do you get _out?_
+
+If you want to just show a view, you're golden, since that's what RN expects.
+
+If you want to escape more generally, you're basically doing **navigation.**
+So set up a native API, and then trigger it, and now you can do whatever.
+
+See again remarks earlier about how this dovetails well with the "views as dumb
+displays + buttons" of the Coordinator Pattern.
+
+
+
+## 2017-12-15 (Fri)
+Today:
+
+- Brainstorm blogpost ideas
+- Draft at least one
+- If time allows, dive into Stateless Function & Higher-Order Components in
+  React.
+
+Next:
+
+- Tech review and publication for the blogpost.
+- More thinking on what RN means for NN devs, and how we can collaborate and
+  best leverage RN.
+- Playing around with Electrode Native, perhaps?
 
 
 ## SOMEDAY/MAYBE
