@@ -967,6 +967,9 @@ But I haven't seen anyone else connect Coordinators and React Native like that.
 
 So, let's run with that!
 
+Another idea: Flesh out that "what is Expo" happy path explanation above into
+a micropost.
+
 
 
 ## SOMEDAY/MAYBE
