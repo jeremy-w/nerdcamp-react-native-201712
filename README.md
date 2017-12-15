@@ -39,6 +39,13 @@ both those platforms faster.
 
 
 
+### Abbreviations
+- **RN:** React Native
+- **NN:** Native-Native (that is, native, but duplicated to stress it in contrast with React Native)
+- **MS:** Microsoft
+
+
+
 ## 2017-12-11 (Monday)
 **How does React Native work from top to bottom, both technologically and sociologically?**
 
