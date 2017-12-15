@@ -895,17 +895,78 @@ displays + buttons" of the Coordinator Pattern.
 ## 2017-12-15 (Fri)
 Today:
 
-- Brainstorm blogpost ideas
-- Draft at least one
-- If time allows, dive into Stateless Function & Higher-Order Components in
-  React.
+- Wrote up notes after reading a ton of blogposts from Artsy.
+    - They've got this "experienced iOS devs migrate to React Native" thing
+      sewn up pretty well.
+- Brainstormed blog post ideas
+- Sketched out a [blog post](coordinating-react-native/README.md)
 
 Next:
 
-- Tech review and publication for the blogpost.
+- Reflect on this past week.
+- Look into Navigation. Currently terra incognita for me.
+- Actually look into Flexbox. I keep putting it off because I'm not too concerned about it, but I do need to learn it eventually.
 - More thinking on what RN means for NN devs, and how we can collaborate and
   best leverage RN.
-- Playing around with Electrode Native, perhaps?
+- Poking around inside a RN app, as outlined in the SOMEDAY/MAYBE section
+  below.
+
+
+### READ: Lots of Artsy blog posts
+They've a large
+[React Native at Artsy blog post series](https://artsy.github.io/series/react-native-at-artsy/)
+covering:
+
+- [Announcing their move to React Native](https://artsy.github.io/blog/2016/08/15/React-Native-at-Artsy/)
+- [Reflecting on a year of React Native, versus Swift](https://artsy.github.io/blog/2017/02/05/Retrospective-Swift-at-Artsy/)
+- [Incorporating React Natvie into their iOS app using Cocoapods](https://artsy.github.io/blog/2016/08/24/On-Emission/)
+- Details on the tools they're using:
+    - [Libraries](https://artsy.github.io/blog/2017/02/05/Front-end-JavaScript-at-Artsy-2017/)
+    - [VS Code](https://artsy.github.io/blog/2016/08/15/vscode/)
+- Intros to some tools, aimed at experienced iOS devs:
+    - [GraphQL](https://artsy.github.io/blog/2016/06/19/graphql-for-mobile/)
+    - [React Native](https://artsy.github.io/blog/2017/07/06/React-Native-for-iOS-devs/)
+    - A [React Native related projects glossary](https://artsy.github.io/blog/2016/11/14/JS-Glossary/) of libraries and tools you'll touch on as you move into React Native.
+
+Their basic take is:
+
+- If you're building an API-driven app, you should probably be using React
+  Native.
+- For mobile, you want Relay, so that you minimize Web requests.
+- Add in GraphQL, and you can further reduce the data going back and forth
+    - Bonus: You can centralize business logic across platforms on the
+      server-side.
+    - Also bonus: You get to use
+      [GraphiQL](https://github.com/graphql/graphiql) to explore, build, and
+      refine API requests.
+
+They wound up using TypeScript rather than Flow due to TS's better integration
+with VS Code. This is after taking steps to try to improve Flow's integration
+into VS Code, and eventually giving up.
+
+
+
+### RANDOM: macOS & Qt React Native; Flutter
+It sounds like there are macOS & Qt projects for React Native.
+I'ma guess they don't have anywhere near the backing the MS native one does.
+I need to search a bit to track down links at some point, though.
+
+I feel like Electron + React serves Desktop needs well enough that React Native
+doesn't make as much sense outside of mobile. Put those cores to work! ;)
+
+Flutter: My basic read is "React Native, only Googly". I'd be curious if it
+amounts to more than Google NIH. (If nothing else, I suspect its Android
+support will be a smidgen better than React Native's.)
+
+
+
+### Blogpost Ideas
+It feels like Artsy already wrote many of the posts I would want to read.
+
+But I haven't seen anyone else connect Coordinators and React Native like that.
+
+So, let's run with that!
+
 
 
 ## SOMEDAY/MAYBE
