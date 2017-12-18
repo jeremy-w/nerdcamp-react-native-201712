@@ -17,6 +17,48 @@ Jeremy W. Sherman, December 2017
 - While being able to readily leap in and out of React Native and Native Native to best leverage the two approaches' strengths?
 
 
+## Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [My Background](#my-background)
+- [Abbreviations](#abbreviations)
+- [2017-12-11 (Monday)](#2017-12-11-monday)
+  - [React Native: The Who](#react-native-the-who)
+  - [React Native: The When](#react-native-the-when)
+- [2017-12-12 (Tues)](#2017-12-12-tues)
+  - [READ: Case Study: UberEats: From React/Flux to React Native](#read-case-study-ubereats-from-reactflux-to-react-native)
+  - [READ: React Native docs](#read-react-native-docs)
+- [2017-12-13 (Wed)](#2017-12-13-wed)
+  - [Guides, Continued](#guides-continued)
+  - [Yoga: Facebook's "flexbox-ish" layout engine](#yoga-facebooks-flexbox-ish-layout-engine)
+  - [iOS Guides](#ios-guides)
+- [2017-12-14 (Thurs)](#2017-12-14-thurs)
+  - [Electrode Native](#electrode-native)
+    - [Follow-Up Questions for Electrode Native](#follow-up-questions-for-electrode-native)
+  - [Summarizing Expo](#summarizing-expo)
+  - [GOTCHA: Nested Stateless Functional Components Do Not Hot Reload](#gotcha-nested-stateless-functional-components-do-not-hot-reload)
+  - [iOS Guides, Continued](#ios-guides-continued)
+  - [How to bounce back from React Native to Native-Native?](#how-to-bounce-back-from-react-native-to-native-native)
+- [2017-12-15 (Fri)](#2017-12-15-fri)
+  - [READ: Lots of Artsy blog posts](#read-lots-of-artsy-blog-posts)
+  - [RANDOM: macOS & Qt React Native; Flutter](#random-macos--qt-react-native-flutter)
+  - [Blogpost Ideas](#blogpost-ideas)
+- [2017-12-18 (Mon)](#2017-12-18-mon)
+  - [Flexbox](#flexbox)
+  - [Grid (not (yet?) relevant to React Native)](#grid-not-yet-relevant-to-react-native)
+  - [A Piecemeal Reactification Example: Instagram Engineering](#a-piecemeal-reactification-example-instagram-engineering)
+  - [React Native's Challenges: TTFR + The Two Edges of Async's Sword](#react-natives-challenges-ttfr--the-two-edges-of-asyncs-sword)
+  - [BSD + Patents](#bsd--patents)
+  - [READ: Ariel Elkin: Why I'm Not a React Native Dev](#read-ariel-elkin-why-im-not-a-react-native-dev)
+- [SOMEDAY/MAYBE](#somedaymaybe)
+  - [React Native: The How, Statically](#react-native-the-how-statically)
+  - [React Native: The How, Dynamically](#react-native-the-how-dynamically)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+
 
 ## My Background
 - Professional macOS & iOS dev since 2008.
@@ -39,7 +81,7 @@ both those platforms faster.
 
 
 
-### Abbreviations
+## Abbreviations
 - **RN:** React Native
 - **NN:** Native-Native (that is, native, but duplicated to stress it in contrast with React Native)
 - **MS:** Microsoft
