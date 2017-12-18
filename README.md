@@ -972,6 +972,143 @@ a micropost.
 
 
 
+## 2017-12-18 (Mon)
+Today:
+
+- Ran doctoc at last. That should make this massive docco a smidge more
+  navigable. (Except on mobile, because GitHub's Markdown renderer for
+  mobile omits anchors / uses completely different anchors. Go figure.)
+- Added brief notes on CSS flexbox and grid layouts.
+- Added scant thoughts on "Why I'm not a React Native developer".
+- Dropped link to WordPress counsel's opinion on Facebook's BSD + Patents
+  license. (Which still applies to React Native, although React and Jest
+  have been relicensed to plain-old-BSD.)
+- Blogpost idea: How would you ask a native engineer to code up a native
+  component so that you as a React Native engineer could readily integrate it,
+  but without requiring the native engineer to know much of anything about
+  React Native itself.
+
+Next:
+
+- Continue working on blogposts as time allows.
+
+
+### Flexbox
+I read through the spec over the weekend. Its LTR handling sounds pretty decent
+due to `row` defaulting to the inline-flow direction, and pervasive use of the
+main/cross-axis verbiage for orienting things within the layout. Stuff gets
+a bit hairy around baseline alignment, since that interacts in fun ways with
+text, which doesn't necessarily respect this whole main/cross-axis deal.
+
+**Q. Are Yoga's criticisms of Flexbox's RTL-handling were based on an earlier draft?**
+
+It was about as simple as I expected, luckily. Rather intuitive system. There
+are some procedural steps when it comes to dealing with basis size, auto
+margins, and free space. But overall, it is indeed a pretty nice system that
+makes it easy to lay out content, especially when you factor in being able to
+nest flex containers within flex containers.
+
+The big thing to watch out for IMO is the target of various directives: whether
+it's the flex _container_ or the flex _item_ within the container. I think this
+is amply summarized by the CSS Tricks article [Chris Coyier's "A Complete Guide
+to Flexbox"](https://css-tricks.com/snippets/css/a-guide-to-flexbox/), though,
+so I don't see any need to work this over myself.
+
+
+### Grid (not (yet?) relevant to React Native)
+This is more explicitly row vs column, since it's inherently 2D, unlike
+Flexbox, which is "1D with optional linebreaking".
+
+The ability to name gridlines and even do grid area layout in what amounts to
+ASCII art is pretty nifty.
+
+For this, I just looked over
+[Chris House's "A Complete Guide to Grid"](https://css-tricks.com/snippets/css/complete-guide-grid/).
+I'm only partway through just now - I've read over the container properties, but not yet the per-item properties.
+
+You can see from the way the `grid` shorthand is set up that the expected usage modes are:
+
+- Explicit grid, no areas: Template out the rows, columns, and line names
+- Explicit grid, using ASCII art areas: As above, but you use ASCII art to lay
+  out areas visually.
+- Auto grid: Lean on the auto placement algorithm after rigging up layout
+  direction and sizing for rows/columns (which can be `auto` to let content
+  dictate).
+
+Oh, another fun fillip is that, even if you have an explicit grid, you can
+place grid items outside that grid! And instead of everything going to heck
+- this is CSS, the render must go on! - it just auto-vivifies intervening
+rows/columns as needed to put the grid item where you told it to. This is of
+course also the machinery that enables the "auto grid" approach, so it does
+double duty as a fallback. (And the default auto sizing is, of course, `auto`,
+which is flexible.)
+
+
+### A Piecemeal Reactification Example: Instagram Engineering
+Instagram Engineering talks about going through this process, the performance
+impacts (and the lengths they went to to preserve their Android perf), and the
+gains they saw especially in code sharing and thus dev speed across iOS
+& Android.
+
+But they don't share any code, so it's all very high level! Which leaves my
+walkthrough blogpost I sketched out still worth doing. Yay!
+
+
+### React Native's Challenges: TTFR + The Two Edges of Async's Sword
+As of September 2016, per Brent Vatne, paraphrased by me:
+
+> React Native’s biggest challenges:
+>
+> - Startup time: It should be just as fast to render a part of your app with
+>   as without 
+> - Listviews & complex gestures: Both struggle with the async architecture.
+>   It’s great, but it also makes these things difficult.
+
+
+### BSD + Patents
+Patent termination affects only the patent license, not the source copyright
+license. You wouldn't have to recode everything suddenly. It just means that,
+if you sue Facebook, the gloves come off, and they can sue you for any patent
+of theirs you might find yourself suddenly infringing via React (if anything!).
+
+This likely isn't an issue if you don't engage in a lot of patent suits.
+
+Paraphrased from: [Paul Sieminksi](https://github.com/Automattic/wp-calypso/issues/650#issuecomment-235086367)
+
+Found via: [Automattic CEO Matt Mullenweg's article "On React and WordPress"](https://ma.tt/2017/09/on-react-and-wordpress/)
+
+> As our general counsel wrote, we made the decision that we'd never run into
+> the patent issue.
+
+
+### READ: Ariel Elkin: Why I'm Not a React Native Dev
+https://arielelkin.github.io/articles/why-im-not-a-react-native-developer.html
+
+Published: 2016-09-21.
+
+Grants:
+
+- React's declarative approach and fast iterations are fabulous
+- Not having to rewrite the same logic for each platform is great
+
+Concerned over:
+
+- Facebook's ownership of React Native and unclear intentions around it - will they keep pushing it forward, or will you, your dev team, and your product wind up marooned on React Native Island?
+    - Ditto for all the many dependencies. This is, as Artsy acknowledges, rather culturally ofputting for Native devs (probably more so on iOS than Android - Maven is well-used for Android), and not everyone feels up to maintaining their tooling as Artsy does.
+- The BSD + Patents license, but misunderstands the separate survivability of the Patent and Copyright license grants, so overdramatizes this.
+- JavaScript. I think this is less an issue than they do, and their "castle built on sand/swamp" jag seems to apply as well to "SourceKit Service Terminated" and "Oops Compiler Segfault" Swift usage as it does to JS, so that's a bit less convincing than they might have expected IMO.
+
+They think Xamarin and Appcelerator (and perhaps some day Flutter + Dart,
+though I don't get why Dart gets a pass here while TypeScript does not?) would
+be better on all these points. I think they underestimate the value of fast
+feedback, hot reload, and being able to fix your whole stack from top to
+bottom.
+
+So, I think this is a very good article to read alongside all the hype and
+ra-ra, but on balance, I don't believe it makes a strong enough case to counter
+the advantages of React Native. (You might feel differently!)
+
+
 ## SOMEDAY/MAYBE
 ### React Native: The How, Statically
 Let's look at how apps get built.
